@@ -1,3 +1,4 @@
+import 'package:care_giver/ui/pages/login_page.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -14,6 +15,9 @@ class MyMainCareDiver extends StatefulWidget {
 class _MyMainCareDiverState extends State<MyMainCareDiver> {
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return const MaterialApp(
+      home: Scaffold(body: LoginPage()),
+      debugShowCheckedModeBanner: false,
+    );
   }
 }
