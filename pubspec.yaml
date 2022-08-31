@@ -31,6 +31,9 @@ dependencies:
     sdk: flutter
   # A package that allows you to use a native file explorer to pick single or multiple absolute file paths, with extension filtering support.
   file_picker: ^5.0.1
+  sqflite: ^2.0.3+1
+  # A animated menu using a floating action button , the aesthetic of the menu items are fully customisable
+  floating_action_bubble: ^1.1.4
 
 
   # The following adds the Cupertino Icons font to your application.
