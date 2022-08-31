@@ -2,6 +2,8 @@ import 'package:care_giver/ui/pages/login_page.dart';
 import 'package:care_giver/util/navigator_util.dart';
 import 'package:flutter/material.dart';
 
+import '../../util/reg_exp_util.dart';
+
 class RegistrationPage extends StatefulWidget {
   const RegistrationPage({Key? key}) : super(key: key);
 
@@ -23,7 +25,9 @@ class _RegistrationPageState extends State<RegistrationPage> {
     super.dispose();
 
     _userNameTextEditingController.dispose();
+    _gmailOrPhoneNoTextEditingController.dispose();
     _passwordTextEditingController.dispose();
+    _confirmedPasswordTextEditingController.dispose();
   }
 
   @override
@@ -92,7 +96,10 @@ class _RegistrationPageState extends State<RegistrationPage> {
         if (value == null || value.isEmpty) {
           return 'Enter gmail or phone number';
         }
-        // check gmail format or phone format
+        if ((!_isNumeric(value) && !RegExpUtils.email.hasMatch(value)) ||
+            !RegExpUtils.phoneNumber.hasMatch(value)) {
+          return 'Enter gmail or phone number';
+        }
         return null;
       },
       decoration: const InputDecoration(
@@ -161,6 +168,13 @@ class _RegistrationPageState extends State<RegistrationPage> {
         NavigatorUtils.pushAndRemoveUntil(context, const LoginPage());
       },
     );
+  }
+
+  bool _isNumeric(String? result) {
+    if (result == null) {
+      return false;
+    }
+    return double.tryParse(result) != null;
   }
 
   Future<void> _registration() async {
