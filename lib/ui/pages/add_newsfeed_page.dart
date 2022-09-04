@@ -155,21 +155,9 @@ class _AddNewsfeedPageState extends State<AddNewsfeedPage> {
     setState(() {
       _loading = true;
     });
-
-    if (widget.firstAid != null && widget.firstAid?.id != null) {
-      showSimpleSnackBar(
-        context,
-        "Editing data is something wrong!",
-        Colors.red,
-      );
-      setState(() {
-        _loading = false;
-      });
-      return;
-    }
-
+    bool isUpdate = widget.firstAid != null && widget.firstAid?.id != null;
     // call saveInfo
-    final result = widget.firstAid != null
+    final result = isUpdate
         ? await FirstAidTable.update(FirstAid(
             id: widget.firstAid!.id,
             name: _nameTextEditingController.text,
@@ -186,7 +174,7 @@ class _AddNewsfeedPageState extends State<AddNewsfeedPage> {
 
     showSimpleSnackBar(
       context,
-      "Insert newsfeed is ${result > -1 ? 'successful' : 'failed'}",
+      "${isUpdate ? 'Update' : 'Insert'} newsfeed is ${result > -1 ? 'successful' : 'failed'}",
       result > -1 ? Colors.green : Colors.red,
     );
     if (result > -1) {

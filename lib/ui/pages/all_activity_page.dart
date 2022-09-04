@@ -31,7 +31,7 @@ class _AllActivityPageState extends State<AllActivityPage>
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _typeAheadController = TextEditingController();
   String? _filteredFirstAidName;
-  late List<FirstAid> _searchSuggestions;
+  List<FirstAid> _searchSuggestions = [];
 
   @override
   void initState() {
@@ -48,11 +48,14 @@ class _AllActivityPageState extends State<AllActivityPage>
   }
 
   Future<void> _setDataForAutoCompleteSearchBox() async {
-    // List<FirstAid> firstAidList = await FirstAidTable.getAll();
     _searchSuggestions = await FirstAidTable.getAll();
-    // for (var firstAid in firstAidList) {
-    //   _searchSuggestions.add(firstAid.name);
-    // }
+
+    Future.delayed(
+      Duration.zero,
+      () {
+        setState(() {});
+      },
+    );
   }
 
   @override
@@ -105,18 +108,22 @@ class _AllActivityPageState extends State<AllActivityPage>
               transitionBuilder: (context, suggestionsBox, controller) {
                 return suggestionsBox;
               },
-              onSuggestionSelected: (suggestion) {
+              onSuggestionSelected: (suggestion) async {
                 _typeAheadController.text = suggestion.name;
+                await _goToNewsfeed(suggestion);
               },
               errorBuilder: (context, error) => Text('$error',
                   style: TextStyle(color: Theme.of(context).errorColor)),
+              autovalidateMode: AutovalidateMode.onUserInteraction,
               validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please select!';
-                }
+                _filteredFirstAidName = value;
+
+                Future.delayed(Duration.zero, () {
+                  setState(() {});
+                });
+
                 return null;
               },
-              onSaved: (value) => _filteredFirstAidName = value,
             ),
           ),
           IconButton(
@@ -132,31 +139,27 @@ class _AllActivityPageState extends State<AllActivityPage>
 
   List<FirstAid> getSuggestions(String input) {
     List<FirstAid> matches = [];
-    matches.addAll(_searchSuggestions);
 
-    matches
-        .retainWhere((s) => s.name.toLowerCase().contains(input.toLowerCase()));
+    for (var f in _searchSuggestions) {
+      if (f.name.toLowerCase().contains(input.toLowerCase())) {
+        matches.add(f);
+      }
+    }
+
     return matches;
   }
 
   Widget _firstAidListBuilder() {
+    final matches = _filteredFirstAidName != null
+        ? getSuggestions(_filteredFirstAidName!)
+        : _searchSuggestions;
+
     return Expanded(
-      child: FutureBuilder<List<FirstAid>>(
-        future: FirstAidTable.getAll(),
-        builder: ((context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done &&
-              snapshot.hasData &&
-              snapshot.data != null) {
-            return ListView.builder(
-              shrinkWrap: true,
-              itemCount: snapshot.data!.length,
-              itemBuilder: ((context, index) {
-                return _firstAidUniqueView(snapshot.data!.elementAt(index));
-              }),
-            );
-          } else {
-            return const Center(child: CircularProgressIndicator());
-          }
+      child: ListView.builder(
+        shrinkWrap: true,
+        itemCount: matches.length,
+        itemBuilder: ((context, index) {
+          return _firstAidUniqueView(matches.elementAt(index));
         }),
       ),
     );
@@ -165,14 +168,7 @@ class _AllActivityPageState extends State<AllActivityPage>
   Widget _firstAidUniqueView(FirstAid firstAid) {
     return InkWell(
       onTap: () async {
-        final res = await NavigatorUtils.push(
-            context,
-            AddNewsfeedPage(
-              firstAid: firstAid,
-            ));
-        if (res == true) {
-          setState(() {});
-        }
+        _goToNewsfeed(firstAid);
       },
       child: Container(
         width: double.infinity,
@@ -253,15 +249,7 @@ class _AllActivityPageState extends State<AllActivityPage>
             icon: Icons.post_add_rounded,
             titleStyle: const TextStyle(fontSize: 16, color: Colors.white),
             onPress: () async {
-              final res = await NavigatorUtils.push(
-                  context,
-                  const AddNewsfeedPage(
-                    firstAid: null,
-                  ));
-              _animationController.reverse();
-              if (res == true) {
-                setState(() {});
-              }
+              await _goToNewsfeed(null);
             },
           ),
         if (CacheManager.admin != null)
@@ -312,5 +300,17 @@ class _AllActivityPageState extends State<AllActivityPage>
       iconData: Icons.add,
       backGroundColor: Colors.white,
     );
+  }
+
+  Future<void> _goToNewsfeed(FirstAid? firstAid) async {
+    final res = await NavigatorUtils.push(
+        context,
+        AddNewsfeedPage(
+          firstAid: firstAid,
+        ));
+    _animationController.reverse();
+    if (res == true) {
+      _setDataForAutoCompleteSearchBox();
+    }
   }
 }
