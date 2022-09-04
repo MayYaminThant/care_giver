@@ -1,3 +1,4 @@
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:care_giver/ui/pages/login_page.dart';
 import 'package:flutter/material.dart';
 
@@ -5,6 +6,29 @@ import 'database/tables/user_table.dart';
 import 'models/users.dart';
 
 void main() {
+  AwesomeNotifications().initialize(
+    // set the icon to null if you want to use the default app icon
+    null,
+    [
+      NotificationChannel(
+        channelGroupKey: 'scheduled_group',
+        channelKey: 'scheduled',
+        channelName: 'Scheduled Notifications',
+        channelDescription: 'Notifications with schedule functionality',
+        importance: NotificationImportance.High,
+        defaultRingtoneType: DefaultRingtoneType.Alarm,
+        criticalAlerts: true,
+      )
+    ],
+    // Channel groups are only visual and are not required
+    channelGroups: [
+      NotificationChannelGroup(
+        channelGroupkey: 'scheduled_group',
+        channelGroupName: 'Scheduled Notifications',
+      )
+    ],
+    debug: true,
+  );
   runApp(const MyMainCareDiver());
 }
 

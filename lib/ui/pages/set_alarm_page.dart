@@ -1,3 +1,4 @@
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:day_night_time_picker/day_night_time_picker.dart';
 
@@ -35,6 +36,14 @@ class _AlarmsPageState extends State<AlarmsPage> {
                         .millisecondsSinceEpoch,
                     flag: 1,
                   ),
+                );
+
+                final alarm = (await AlarmTable.getAll()).last;
+
+                _createAlarm(
+                  id: alarm.id!,
+                  hour: value.hour,
+                  minute: value.minute,
                 );
 
                 setState(() {});
@@ -101,6 +110,20 @@ class _AlarmsPageState extends State<AlarmsPage> {
                   ),
                 );
 
+                if (value) {
+                  final d = DateTime.fromMillisecondsSinceEpoch(
+                    alarm.alarmTime,
+                  );
+
+                  _createAlarm(
+                    id: alarm.id!,
+                    hour: d.hour,
+                    minute: d.minute,
+                  );
+                } else {
+                  await _cancelAlarm(alarm.id!);
+                }
+
                 setState(() {});
               },
             ),
@@ -108,5 +131,53 @@ class _AlarmsPageState extends State<AlarmsPage> {
         ),
       ),
     );
+  }
+
+  void _createAlarm({
+    required final int id,
+    required final int hour,
+    required final int minute,
+  }) {
+    AwesomeNotifications().isNotificationAllowed().then((isAllowed) async {
+      if (!isAllowed) {
+        // This is just a basic example. For real apps, you must show some
+        // friendly dialog box before call the request method.
+        // This is very important to not harm the user experience
+        AwesomeNotifications().requestPermissionToSendNotifications();
+      } else {
+        await AwesomeNotifications().createNotification(
+          content: NotificationContent(
+            id: id,
+            channelKey: 'scheduled',
+            title: 'Alarm',
+            body: 'Take Medicine',
+            wakeUpScreen: true,
+            category: NotificationCategory.Alarm,
+            criticalAlert: true,
+          ),
+          schedule: NotificationCalendar(
+            hour: hour,
+            minute: minute,
+            second: 1,
+            repeats: true, // for every day
+            allowWhileIdle: true, // do background
+            preciseAlarm: true, // exactly hour and min
+            timeZone: await AwesomeNotifications().getLocalTimeZoneIdentifier(),
+          ),
+          actionButtons: [
+            NotificationActionButton(
+              key: 'close',
+              label: 'Close',
+              buttonType:
+                  ActionButtonType.DisabledAction, // without opening the app
+            ),
+          ],
+        );
+      }
+    });
+  }
+
+  Future<void> _cancelAlarm(int id) async {
+    await AwesomeNotifications().cancel(id);
   }
 }
