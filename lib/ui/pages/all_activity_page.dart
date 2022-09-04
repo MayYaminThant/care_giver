@@ -10,6 +10,7 @@ import 'package:care_giver/ui/pages/search_hospital_page.dart';
 import 'package:care_giver/util/navigator_util.dart';
 import 'package:floating_action_bubble/floating_action_bubble.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 
 import 'set_alarm_page.dart';
 
@@ -27,6 +28,11 @@ class _AllActivityPageState extends State<AllActivityPage>
   late Animation<double> _animation;
   late AnimationController _animationController;
 
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _typeAheadController = TextEditingController();
+  String? _filteredFirstAidName;
+  late List<FirstAid> _searchSuggestions;
+
   @override
   void initState() {
     _animationController = AnimationController(
@@ -37,8 +43,16 @@ class _AllActivityPageState extends State<AllActivityPage>
     final curvedAnimation =
         CurvedAnimation(curve: Curves.easeInOut, parent: _animationController);
     _animation = Tween<double>(begin: 0, end: 1).animate(curvedAnimation);
-
+    _setDataForAutoCompleteSearchBox();
     super.initState();
+  }
+
+  Future<void> _setDataForAutoCompleteSearchBox() async {
+    // List<FirstAid> firstAidList = await FirstAidTable.getAll();
+    _searchSuggestions = await FirstAidTable.getAll();
+    // for (var firstAid in firstAidList) {
+    //   _searchSuggestions.add(firstAid.name);
+    // }
   }
 
   @override
@@ -76,24 +90,33 @@ class _AllActivityPageState extends State<AllActivityPage>
         mainAxisSize: MainAxisSize.min,
         children: [
           Expanded(
-            child: TextField(
-              onChanged: (value) {
-                // catController.searchTerm = value;
+            child: TypeAheadFormField<FirstAid>(
+              textFieldConfiguration: TextFieldConfiguration(
+                  controller: _typeAheadController,
+                  decoration: const InputDecoration(labelText: 'Search')),
+              suggestionsCallback: (pattern) {
+                return getSuggestions(pattern);
               },
-              cursorColor: Colors.black38,
-              controller: _searchTextEditingController,
-              decoration: const InputDecoration(
-                hintText: 'Search',
-                hintStyle: TextStyle(color: Colors.black26),
-                fillColor: Colors.white,
-                border: InputBorder.none,
-                focusedBorder: InputBorder.none,
-                enabledBorder: InputBorder.none,
-                errorBorder: InputBorder.none,
-                disabledBorder: InputBorder.none,
-                contentPadding:
-                    EdgeInsets.only(left: 15, bottom: 11, top: 11, right: 15),
-              ),
+              itemBuilder: (context, suggestion) {
+                return ListTile(
+                  title: Text(suggestion.name),
+                );
+              },
+              transitionBuilder: (context, suggestionsBox, controller) {
+                return suggestionsBox;
+              },
+              onSuggestionSelected: (suggestion) {
+                _typeAheadController.text = suggestion.name;
+              },
+              errorBuilder: (context, error) => Text('$error',
+                  style: TextStyle(color: Theme.of(context).errorColor)),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please select!';
+                }
+                return null;
+              },
+              onSaved: (value) => _filteredFirstAidName = value,
             ),
           ),
           IconButton(
@@ -105,6 +128,15 @@ class _AllActivityPageState extends State<AllActivityPage>
         ],
       ),
     );
+  }
+
+  List<FirstAid> getSuggestions(String input) {
+    List<FirstAid> matches = [];
+    matches.addAll(_searchSuggestions);
+
+    matches
+        .retainWhere((s) => s.name.toLowerCase().contains(input.toLowerCase()));
+    return matches;
   }
 
   Widget _firstAidListBuilder() {
