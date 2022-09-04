@@ -1,3 +1,7 @@
+import 'package:care_giver/common/common_widget.dart';
+import 'package:care_giver/database/tables/user_table.dart';
+import 'package:care_giver/models/users.dart';
+import 'package:care_giver/ui/pages/all_activity_page.dart';
 import 'package:care_giver/ui/pages/login_page.dart';
 import 'package:care_giver/util/navigator_util.dart';
 import 'package:flutter/material.dart';
@@ -48,11 +52,12 @@ class _RegistrationPageState extends State<RegistrationPage> {
                   const SizedBox(height: 16),
                   _gmailOrPhoneNumberForm(),
                   const SizedBox(height: 16),
-                  _passwordForm(_passwordTextEditingController, 'Password'),
-                  const SizedBox(height: 32),
+                  _passwordForm(
+                      _passwordTextEditingController, 'Password', false),
+                  const SizedBox(height: 16),
                   _passwordForm(_confirmedPasswordTextEditingController,
-                      'Confirmed Password'),
-                  const SizedBox(height: 32),
+                      'Confirmed Password', true),
+                  const SizedBox(height: 16),
                   _doneButton(),
                   const SizedBox(height: 50),
                   _loginLabel(),
@@ -112,6 +117,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
   Widget _passwordForm(
     TextEditingController textEditingController,
     String message,
+    bool isConfirmPsw,
   ) {
     return TextFormField(
       controller: textEditingController,
@@ -120,8 +126,14 @@ class _RegistrationPageState extends State<RegistrationPage> {
           return 'Enter ${message.toLowerCase()}';
         }
 
-        if (value.length < 6) {
-          return '$message must be at least 6 characters.';
+        if (value.length < 5) {
+          return '$message must be at least 5 characters.';
+        }
+
+        if (_passwordTextEditingController.text.isNotEmpty &&
+            _passwordTextEditingController.text !=
+                _confirmedPasswordTextEditingController.text) {
+          return 'Password does not match!';
         }
 
         return null;
@@ -184,12 +196,45 @@ class _RegistrationPageState extends State<RegistrationPage> {
       _loading = true;
     });
 
-    // call registration
-
-    setState(() {
-      _loading = false;
-    });
+    // check validation
+    bool isExistUser = await UserTable.checkUserIsExist(
+        _userNameTextEditingController.text,
+        _gmailOrPhoneNoTextEditingController.text,
+        column2: U_CONTACT);
 
     if (!mounted) return;
+
+    if (isExistUser) {
+      showSimpleSnackBar(
+        context,
+        'User is already exist',
+        Colors.red,
+      );
+      setState(() {
+        _loading = false;
+      });
+      return;
+    }
+
+    // call registration
+    final result = await UserTable.insert(MyUser(
+      name: _userNameTextEditingController.text,
+      contact: _gmailOrPhoneNoTextEditingController.text,
+      password: _passwordTextEditingController.text,
+    ));
+
+    if (!mounted) return;
+    showSimpleSnackBar(
+      context,
+      "Registration is ${result > -1 ? 'successful' : 'failed'}",
+      result > -1 ? Colors.green : Colors.red,
+    );
+    if (result > -1) {
+      NavigatorUtils.pushAndRemoveUntil(context, const AllActivityPage());
+    } else {
+      setState(() {
+        _loading = false;
+      });
+    }
   }
 }

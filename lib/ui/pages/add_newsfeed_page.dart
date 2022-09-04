@@ -1,10 +1,15 @@
 import 'dart:io';
 
+import 'package:care_giver/common/common_widget.dart';
+import 'package:care_giver/database/tables/first_aid_table.dart';
+import 'package:care_giver/models/first_aid.dart';
 import 'package:care_giver/util/file_picker_util.dart';
+import 'package:care_giver/util/navigator_util.dart';
 import 'package:flutter/material.dart';
 
 class AddNewsfeedPage extends StatefulWidget {
-  const AddNewsfeedPage({Key? key}) : super(key: key);
+  const AddNewsfeedPage({Key? key, required this.firstAid}) : super(key: key);
+  final FirstAid? firstAid;
 
   @override
   State<AddNewsfeedPage> createState() => _AddNewsfeedPageState();
@@ -31,6 +36,21 @@ class _AddNewsfeedPageState extends State<AddNewsfeedPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.firstAid != null) {
+      _nameTextEditingController.text = widget.firstAid!.name;
+      _instructionTextEditingController.text = widget.firstAid!.instruction;
+      _cautionTextEditingController.text = widget.firstAid!.caution;
+      if (widget.firstAid!.photo != null &&
+          widget.firstAid!.photo!.isNotEmpty) {
+        _photoPathTextEditingController.text = widget.firstAid!.photo!;
+        imageFile = File(_photoPathTextEditingController.text);
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
@@ -43,17 +63,21 @@ class _AddNewsfeedPageState extends State<AddNewsfeedPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   _textFormField(_nameTextEditingController, 'Name'),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 16),
                   _textFormField(
                       _instructionTextEditingController, 'Instruction'),
                   const SizedBox(height: 16),
                   _textFormField(_cautionTextEditingController, 'Caution'),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 16),
                   _photoPathForm('Photo Path'),
                   const SizedBox(height: 32),
-                  _saveButton(),
+                  if (imageFile != null)
+                    Image.file(
+                      imageFile!,
+                      height: 250,
+                    ),
                   const SizedBox(height: 32),
-                  if (imageFile != null) Image.file(imageFile!),
+                  _saveButton(),
                 ],
               ),
             ),
@@ -86,9 +110,12 @@ class _AddNewsfeedPageState extends State<AddNewsfeedPage> {
   ) {
     return InkWell(
       child: AbsorbPointer(
-        child: _textFormField(
-          _photoPathTextEditingController,
-          message,
+        child: TextField(
+          controller: _photoPathTextEditingController,
+          decoration: InputDecoration(
+            label: Text(message),
+            floatingLabelStyle: const TextStyle(color: Colors.black),
+          ),
         ),
       ),
       onTap: () async {
@@ -106,7 +133,7 @@ class _AddNewsfeedPageState extends State<AddNewsfeedPage> {
     return ElevatedButton(
       onPressed: () {
         if (_formKey.currentState?.validate() == true) {
-          _saveInfo();
+          _saveFirstAid();
         }
       },
       child: Container(
@@ -117,24 +144,57 @@ class _AddNewsfeedPageState extends State<AddNewsfeedPage> {
                 padding: EdgeInsets.all(8),
                 child: CircularProgressIndicator(color: Colors.white),
               )
-            : const Text('Save'),
+            : Text(widget.firstAid != null ? 'Update' : 'Save'),
       ),
     );
   }
 
-  Future<void> _saveInfo() async {
+  Future<void> _saveFirstAid() async {
     if (_loading) return;
 
     setState(() {
       _loading = true;
     });
 
-    // call saveInfo
+    if (widget.firstAid != null && widget.firstAid?.id != null) {
+      showSimpleSnackBar(
+        context,
+        "Editing data is something wrong!",
+        Colors.red,
+      );
+      setState(() {
+        _loading = false;
+      });
+      return;
+    }
 
-    setState(() {
-      _loading = false;
-    });
+    // call saveInfo
+    final result = widget.firstAid != null
+        ? await FirstAidTable.update(FirstAid(
+            id: widget.firstAid!.id,
+            name: _nameTextEditingController.text,
+            instruction: _instructionTextEditingController.text,
+            caution: _cautionTextEditingController.text,
+            photo: _photoPathTextEditingController.text))
+        : await FirstAidTable.insert(FirstAid(
+            name: _nameTextEditingController.text,
+            instruction: _instructionTextEditingController.text,
+            caution: _cautionTextEditingController.text,
+            photo: _photoPathTextEditingController.text));
 
     if (!mounted) return;
+
+    showSimpleSnackBar(
+      context,
+      "Insert newsfeed is ${result > -1 ? 'successful' : 'failed'}",
+      result > -1 ? Colors.green : Colors.red,
+    );
+    if (result > -1) {
+      NavigatorUtils.pop(context, result: true);
+    } else {
+      setState(() {
+        _loading = false;
+      });
+    }
   }
 }

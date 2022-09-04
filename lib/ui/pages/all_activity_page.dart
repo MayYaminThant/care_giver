@@ -1,5 +1,12 @@
+import 'dart:io';
+
+import 'package:care_giver/common/cache_manager.dart';
+import 'package:care_giver/database/tables/first_aid_table.dart';
+import 'package:care_giver/models/first_aid.dart';
+import 'package:care_giver/ui/pages/add_hospital.dart';
 import 'package:care_giver/ui/pages/add_newsfeed_page.dart';
 import 'package:care_giver/ui/pages/registration_page.dart';
+import 'package:care_giver/ui/pages/search_hospital_page.dart';
 import 'package:care_giver/util/navigator_util.dart';
 import 'package:floating_action_bubble/floating_action_bubble.dart';
 import 'package:flutter/material.dart';
@@ -39,18 +46,16 @@ class _AllActivityPageState extends State<AllActivityPage>
         body: Padding(
           padding: const EdgeInsets.only(
             top: 25,
-            bottom: 50,
+            bottom: 16,
             left: 16,
             right: 16,
           ),
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                _searchBox(() {}),
-                const SizedBox(height: 16),
-                _newsFeedUniqueView(),
-              ],
-            ),
+          child: Column(
+            children: [
+              _searchBox(() {}),
+              const SizedBox(height: 16),
+              _firstAidListBuilder(),
+            ],
           ),
         ),
         floatingActionButton: _floatingActionButton(),
@@ -100,20 +105,69 @@ class _AllActivityPageState extends State<AllActivityPage>
     );
   }
 
-  Widget _newsFeedUniqueView() {
-    return Container(
-      height: 150,
-      width: double.infinity,
-      decoration: BoxDecoration(
-          border: Border.all(), borderRadius: BorderRadius.circular(8)),
-      child: Column(
-        children: [
-          _label('Name'),
-          const SizedBox(height: 32),
-          _label('Instruction'),
-          const SizedBox(height: 32),
-          _label('Caution'),
-        ],
+  Widget _firstAidListBuilder() {
+    return Expanded(
+      child: FutureBuilder<List<FirstAid>>(
+        future: FirstAidTable.getAll(),
+        builder: ((context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done &&
+              snapshot.hasData &&
+              snapshot.data != null) {
+            return ListView.builder(
+              shrinkWrap: true,
+              itemCount: snapshot.data!.length,
+              itemBuilder: ((context, index) {
+                return _firstAidUniqueView(snapshot.data!.elementAt(index));
+              }),
+            );
+          } else {
+            return const Center(child: CircularProgressIndicator());
+          }
+        }),
+      ),
+    );
+  }
+
+  Widget _firstAidUniqueView(FirstAid firstAid) {
+    return InkWell(
+      onTap: () async {
+        final res = await NavigatorUtils.push(
+            context,
+            AddNewsfeedPage(
+              firstAid: firstAid,
+            ));
+        if (res == true) {
+          setState(() {});
+        }
+      },
+      child: Container(
+        width: double.infinity,
+        margin: const EdgeInsets.all(5),
+        padding: const EdgeInsets.all(5),
+        decoration: BoxDecoration(
+          border: Border.all(),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Column(
+          children: [
+            if (firstAid.photo != null && firstAid.photo!.isNotEmpty)
+              ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.file(
+                    File(firstAid.photo!),
+                    height: 150,
+                    width: MediaQuery.of(context).size.width - 50,
+                    fit: BoxFit.fitWidth,
+                  )),
+            if (firstAid.photo != null && firstAid.photo!.isNotEmpty)
+              const SizedBox(height: 15),
+            _firstAidRowUI('Name', firstAid.name),
+            const SizedBox(height: 15),
+            _firstAidRowUI('Instruction', firstAid.instruction),
+            const SizedBox(height: 15),
+            _firstAidRowUI('Caution', firstAid.caution),
+          ],
+        ),
       ),
     );
   }
@@ -124,37 +178,75 @@ class _AllActivityPageState extends State<AllActivityPage>
       style: TextStyle(
         color: Theme.of(context).primaryColor,
       ),
-      textAlign: TextAlign.center,
+      textAlign: TextAlign.start,
+    );
+  }
+
+  Widget _firstAidRowUI(String label, String value) {
+    return Row(
+      children: [
+        const SizedBox(width: 20),
+        Expanded(child: _label(label)),
+        _label(':'),
+        const SizedBox(width: 20),
+        Expanded(child: _label(value)),
+      ],
     );
   }
 
   Widget _floatingActionButton() {
     return FloatingActionBubble(
       items: <Bubble>[
-        Bubble(
-          // show only admin
-          title: "Registration",
-          iconColor: Colors.white,
-          bubbleColor: Colors.blue,
-          icon: Icons.app_registration_rounded,
-          titleStyle: const TextStyle(fontSize: 16, color: Colors.white),
-          onPress: () {
-            NavigatorUtils.push(context, const RegistrationPage());
-            _animationController.reverse();
-          },
-        ),
-        Bubble(
-          // show only admin
-          title: "Add New feed",
-          iconColor: Colors.white,
-          bubbleColor: Colors.blue,
-          icon: Icons.post_add_rounded,
-          titleStyle: const TextStyle(fontSize: 16, color: Colors.white),
-          onPress: () {
-            NavigatorUtils.push(context, const AddNewsfeedPage());
-            _animationController.reverse();
-          },
-        ),
+        if (CacheManager.admin != null)
+          Bubble(
+            // show only admin
+            title: "Registration",
+            iconColor: Colors.white,
+            bubbleColor: Colors.blue,
+            icon: Icons.app_registration_rounded,
+            titleStyle: const TextStyle(fontSize: 16, color: Colors.white),
+            onPress: () {
+              NavigatorUtils.push(context, const RegistrationPage());
+              _animationController.reverse();
+            },
+          ),
+        if (CacheManager.admin != null)
+          Bubble(
+            // show only admin
+            title: "Add New feed",
+            iconColor: Colors.white,
+            bubbleColor: Colors.blue,
+            icon: Icons.post_add_rounded,
+            titleStyle: const TextStyle(fontSize: 16, color: Colors.white),
+            onPress: () async {
+              final res = await NavigatorUtils.push(
+                  context,
+                  const AddNewsfeedPage(
+                    firstAid: null,
+                  ));
+              _animationController.reverse();
+              if (res == true) {
+                setState(() {});
+              }
+            },
+          ),
+        if (CacheManager.admin != null)
+          Bubble(
+            // show only admin
+            title: "Add Hospital",
+            iconColor: Colors.white,
+            bubbleColor: Colors.blue,
+            icon: Icons.post_add_rounded,
+            titleStyle: const TextStyle(fontSize: 16, color: Colors.white),
+            onPress: () async {
+              final res =
+                  await NavigatorUtils.push(context, const AddHospitalPage());
+              _animationController.reverse();
+              if (res == true) {
+                setState(() {});
+              }
+            },
+          ),
         Bubble(
           title: "Set Alarm Time",
           iconColor: Colors.white,
@@ -172,6 +264,7 @@ class _AllActivityPageState extends State<AllActivityPage>
           icon: Icons.local_hospital_rounded,
           titleStyle: const TextStyle(fontSize: 16, color: Colors.white),
           onPress: () {
+            NavigatorUtils.push(context, const SearchHospitalPage());
             _animationController.reverse();
           },
         ),

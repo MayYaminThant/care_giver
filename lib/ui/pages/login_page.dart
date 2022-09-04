@@ -1,6 +1,11 @@
-import 'package:care_giver/ui/pages/registration_page.dart';
+import 'package:care_giver/common/cache_manager.dart';
+import 'package:care_giver/database/tables/user_table.dart';
+import 'package:care_giver/models/users.dart';
 import 'package:care_giver/util/navigator_util.dart';
 import 'package:flutter/material.dart';
+
+import '../../common/common_widget.dart';
+import 'all_activity_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -86,8 +91,8 @@ class _LoginPageState extends State<LoginPage> {
           return 'Enter password';
         }
 
-        if (value.length < 6) {
-          return 'Password must be at least 6 characters.';
+        if (value.length < 5) {
+          return 'Password must be at least 5 characters.';
         }
 
         return null;
@@ -143,7 +148,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
             onTap: () {
               NavigatorUtils.pushAndRemoveUntil(
-                  context, const RegistrationPage());
+                  context, const AllActivityPage());
             })
       ],
     );
@@ -157,11 +162,24 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     // call login
-
-    setState(() {
-      _loading = false;
-    });
+    MyUser? validUser = await UserTable.getAUser(
+        _userNameTextEditingController.text,
+        _passwordTextEditingController.text);
 
     if (!mounted) return;
+
+    showSimpleSnackBar(
+      context,
+      "${validUser != null ? 'Login successful' : 'Invalid User'}!",
+      validUser != null ? Colors.green : Colors.red,
+    );
+    if (validUser != null) {
+      CacheManager.admin = validUser;
+      NavigatorUtils.pushAndRemoveUntil(context, const AllActivityPage());
+    } else {
+      setState(() {
+        _loading = false;
+      });
+    }
   }
 }
