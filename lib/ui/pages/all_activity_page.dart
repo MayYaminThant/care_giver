@@ -11,6 +11,8 @@ import 'package:care_giver/util/navigator_util.dart';
 import 'package:floating_action_bubble/floating_action_bubble.dart';
 import 'package:flutter/material.dart';
 
+import 'set_alarm_page.dart';
+
 class AllActivityPage extends StatefulWidget {
   const AllActivityPage({Key? key}) : super(key: key);
 
@@ -254,6 +256,7 @@ class _AllActivityPageState extends State<AllActivityPage>
           icon: Icons.timer,
           titleStyle: const TextStyle(fontSize: 16, color: Colors.white),
           onPress: () {
+            NavigatorUtils.push(context, const AlarmsPage());
             _animationController.reverse();
           },
         ),

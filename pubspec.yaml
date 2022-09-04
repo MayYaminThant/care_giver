@@ -38,6 +38,8 @@ dependencies:
   location: ^4.4.0
   # Geolocation plugin for Flutter. This plugin provides a cross-platform (iOS, Android) API for generic location (GPS etc.) functions.
   geolocator: ^9.0.1
+  day_night_time_picker: ^1.1.2
+  intl: ^0.17.0
 
 
   # The following adds the Cupertino Icons font to your application.

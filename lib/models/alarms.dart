@@ -3,7 +3,7 @@ import '../database/tables/alarm_table.dart';
 class MyAlarm {
   final int? id;
   final int alarmTime;
-  final int flag;
+  final int flag; // 1: ON, 0: OFF
 
   MyAlarm({
     this.id,
