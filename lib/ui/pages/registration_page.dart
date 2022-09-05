@@ -101,8 +101,8 @@ class _RegistrationPageState extends State<RegistrationPage> {
         if (value == null || value.isEmpty) {
           return 'Enter gmail or phone number';
         }
-        if ((!_isNumeric(value) && !RegExpUtils.email.hasMatch(value)) ||
-            !RegExpUtils.phoneNumber.hasMatch(value)) {
+        if (!((!isNumeric(value) && RegExpUtils.email.hasMatch(value)) ||
+            (isNumeric(value) && RegExpUtils.phoneNumber.hasMatch(value)))) {
           return 'Enter gmail or phone number';
         }
         return null;
@@ -180,13 +180,6 @@ class _RegistrationPageState extends State<RegistrationPage> {
         NavigatorUtils.pushAndRemoveUntil(context, const LoginPage());
       },
     );
-  }
-
-  bool _isNumeric(String? result) {
-    if (result == null) {
-      return false;
-    }
-    return double.tryParse(result) != null;
   }
 
   Future<void> _registration() async {

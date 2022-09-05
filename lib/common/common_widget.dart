@@ -17,3 +17,10 @@ void showSimpleSnackBar(
     ),
   );
 }
+
+bool isNumeric(String? result) {
+  if (result == null) {
+    return false;
+  }
+  return double.tryParse(result) != null;
+}

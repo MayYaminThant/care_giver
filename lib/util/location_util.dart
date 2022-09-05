@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:location/location.dart';
 
 class LocationUtils {

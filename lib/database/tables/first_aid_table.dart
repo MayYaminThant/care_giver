@@ -1,3 +1,5 @@
+// ignore_for_file: constant_identifier_names
+
 import 'package:care_giver/models/first_aid.dart';
 import 'package:sqflite/sqflite.dart';
 

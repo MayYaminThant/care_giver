@@ -23,8 +23,6 @@ class AllActivityPage extends StatefulWidget {
 
 class _AllActivityPageState extends State<AllActivityPage>
     with SingleTickerProviderStateMixin {
-  final TextEditingController _searchTextEditingController =
-      TextEditingController();
   late Animation<double> _animation;
   late AnimationController _animationController;
 
@@ -94,9 +92,14 @@ class _AllActivityPageState extends State<AllActivityPage>
         children: [
           Expanded(
             child: TypeAheadFormField<FirstAid>(
+              key: _formKey,
               textFieldConfiguration: TextFieldConfiguration(
-                  controller: _typeAheadController,
-                  decoration: const InputDecoration(labelText: 'Search')),
+                controller: _typeAheadController,
+                decoration: const InputDecoration(
+                  hintText: 'Search',
+                  contentPadding: EdgeInsets.all(10),
+                ),
+              ),
               suggestionsCallback: (pattern) {
                 return getSuggestions(pattern);
               },
@@ -205,9 +208,6 @@ class _AllActivityPageState extends State<AllActivityPage>
   Widget _label(String label) {
     return Text(
       label,
-      style: TextStyle(
-        color: Theme.of(context).primaryColor,
-      ),
       textAlign: TextAlign.start,
     );
   }

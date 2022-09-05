@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../common/common_widget.dart';
 import '../../util/navigator_util.dart';
+import '../../util/reg_exp_util.dart';
 
 class AddHospitalPage extends StatefulWidget {
   const AddHospitalPage({Key? key}) : super(key: key);
@@ -93,9 +94,14 @@ class _AddHospitalPageState extends State<AddHospitalPage> {
       controller: textEditingController,
       keyboardType: keyboardType,
       validator: (String? value) {
-        return (value == null || value.isEmpty)
-            ? 'Enter ${message.toLowerCase()}'
-            : null;
+        if (value == null || value.isEmpty) {
+          return 'Enter ${message.toLowerCase()}';
+        }
+        if (keyboardType == TextInputType.phone &&
+            (!isNumeric(value) || !RegExpUtils.phoneNumber.hasMatch(value))) {
+          return 'Invalid phone number!';
+        }
+        return null;
       },
       decoration: InputDecoration(
         label: Text(message),

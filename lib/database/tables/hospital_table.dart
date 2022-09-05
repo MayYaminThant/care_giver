@@ -1,3 +1,5 @@
+// ignore_for_file: constant_identifier_names
+
 import 'package:care_giver/database/database_helper.dart';
 import 'package:care_giver/models/hospital.dart';
 import 'package:sqflite/sqflite.dart';
@@ -18,8 +20,8 @@ class HospitalTable {
       '$HS_NAME TEXT NOT NULL,'
       '$HS_PHONE TEXT NOT NULL,'
       '$HS_ADDRESS TEXT NOT NULL,'
-      '$HS_LATITUDE INTEGER NOT NULL,'
-      '$HS_LONGITUDE INTEGER NOT NULL)',
+      '$HS_LATITUDE REAL NOT NULL,'
+      '$HS_LONGITUDE REAL NOT NULL)',
     );
   }
 

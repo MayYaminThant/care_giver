@@ -63,14 +63,14 @@ class _SearchHospitalPageState extends State<SearchHospitalPage> {
 
             snapshot.data!.sort(((a, b) {
               final val1 = Geolocator.distanceBetween(
-                a.latitude.toDouble(),
-                a.longitude.toDouble(),
+                a.latitude,
+                a.longitude,
                 currentLatitude,
                 currentLatitude,
               );
               final val2 = Geolocator.distanceBetween(
-                b.latitude.toDouble(),
-                b.longitude.toDouble(),
+                b.latitude,
+                b.longitude,
                 currentLatitude,
                 currentLatitude,
               );
@@ -78,20 +78,17 @@ class _SearchHospitalPageState extends State<SearchHospitalPage> {
               return (val1 - val2).toInt();
             }));
 
-            for (var i = 0; i < 3; i++) {
-              Hospital hospital = snapshot.data!.elementAt(i);
+            final maxLength =
+                snapshot.data!.length > 3 ? 3 : snapshot.data!.length;
+
+            for (var i = 0; i < maxLength; i++) {
+              Hospital hospital = snapshot.data![i];
               tableRows.add(
                 TableRow(
                   children: [
                     _tableChildRow(hospital.hospitalName),
                     _tableChildRow(hospital.phone),
                     _tableChildRow(hospital.address),
-                    // _tableHeaderRow(Geolocator.distanceBetween(
-                    //   hospital.latitude.toDouble(),
-                    //   hospital.longitude.toDouble(),
-                    //   currentLatitude,
-                    //   currentLatitude,
-                    // ).toString()),
                   ],
                 ),
               );
@@ -102,7 +99,6 @@ class _SearchHospitalPageState extends State<SearchHospitalPage> {
                   _tableHeaderRow('Hospital'),
                   _tableHeaderRow('Phone'),
                   _tableHeaderRow('Address'),
-                  // _tableHeaderRow('Distance'),
                 ]),
                 ...tableRows,
               ]),
