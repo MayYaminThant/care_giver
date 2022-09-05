@@ -1,7 +1,7 @@
-import 'package:care_giver/common/cache_manager.dart';
-import 'package:care_giver/database/tables/user_table.dart';
-import 'package:care_giver/models/users.dart';
-import 'package:care_giver/util/navigator_util.dart';
+import '../../common/cache_manager.dart';
+import '../../database/tables/user_table.dart';
+import '../../models/users.dart';
+import '../../util/navigator_util.dart';
 import 'package:flutter/material.dart';
 
 import '../../common/common_widget.dart';

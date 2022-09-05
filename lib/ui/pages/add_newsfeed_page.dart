@@ -1,10 +1,10 @@
 import 'dart:io';
 
-import 'package:care_giver/common/common_widget.dart';
-import 'package:care_giver/database/tables/first_aid_table.dart';
-import 'package:care_giver/models/first_aid.dart';
-import 'package:care_giver/util/file_picker_util.dart';
-import 'package:care_giver/util/navigator_util.dart';
+import '../../common/common_widget.dart';
+import '../../database/tables/first_aid_table.dart';
+import '../../models/first_aid.dart';
+import '../../util/file_picker_util.dart';
+import '../../util/navigator_util.dart';
 import 'package:flutter/material.dart';
 
 class AddNewsfeedPage extends StatefulWidget {

@@ -1,5 +1,5 @@
-import 'package:care_giver/database/tables/hospital_table.dart';
-import 'package:care_giver/models/hospital.dart';
+import '../../database/tables/hospital_table.dart';
+import '../../models/hospital.dart';
 import 'package:flutter/material.dart';
 
 import '../../common/common_widget.dart';

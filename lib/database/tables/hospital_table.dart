@@ -1,7 +1,7 @@
 // ignore_for_file: constant_identifier_names
 
-import 'package:care_giver/database/database_helper.dart';
-import 'package:care_giver/models/hospital.dart';
+import '../../database/database_helper.dart';
+import '../../models/hospital.dart';
 import 'package:sqflite/sqflite.dart';
 
 const HS_TABLE_NAME = 'tbl_hospital';

@@ -1,5 +1,5 @@
 import 'package:awesome_notifications/awesome_notifications.dart';
-import 'package:care_giver/ui/pages/login_page.dart';
+import '../../ui/pages/login_page.dart';
 import 'package:flutter/material.dart';
 
 import 'database/tables/user_table.dart';

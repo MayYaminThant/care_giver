@@ -1,7 +1,7 @@
 // ignore_for_file: constant_identifier_names
 
-import 'package:care_giver/database/database_helper.dart';
-import 'package:care_giver/models/users.dart';
+import '../../database/database_helper.dart';
+import '../../models/users.dart';
 import 'package:sqflite/sqflite.dart';
 
 const U_TABLE_NAME = 'tbl_user';

@@ -1,13 +1,13 @@
 import 'dart:io';
 
-import 'package:care_giver/common/cache_manager.dart';
-import 'package:care_giver/database/tables/first_aid_table.dart';
-import 'package:care_giver/models/first_aid.dart';
-import 'package:care_giver/ui/pages/add_hospital.dart';
-import 'package:care_giver/ui/pages/add_newsfeed_page.dart';
-import 'package:care_giver/ui/pages/registration_page.dart';
-import 'package:care_giver/ui/pages/search_hospital_page.dart';
-import 'package:care_giver/util/navigator_util.dart';
+import '../../common/cache_manager.dart';
+import '../../database/tables/first_aid_table.dart';
+import '../../models/first_aid.dart';
+import '../../ui/pages/add_hospital.dart';
+import '../../ui/pages/add_newsfeed_page.dart';
+import '../../ui/pages/registration_page.dart';
+import '../../ui/pages/search_hospital_page.dart';
+import '../../util/navigator_util.dart';
 import 'package:floating_action_bubble/floating_action_bubble.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';

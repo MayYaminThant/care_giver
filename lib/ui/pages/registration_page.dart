@@ -1,9 +1,9 @@
-import 'package:care_giver/common/common_widget.dart';
-import 'package:care_giver/database/tables/user_table.dart';
-import 'package:care_giver/models/users.dart';
-import 'package:care_giver/ui/pages/all_activity_page.dart';
-import 'package:care_giver/ui/pages/login_page.dart';
-import 'package:care_giver/util/navigator_util.dart';
+import '../../common/common_widget.dart';
+import '../../database/tables/user_table.dart';
+import '../../models/users.dart';
+import '../../ui/pages/all_activity_page.dart';
+import '../../ui/pages/login_page.dart';
+import '../../util/navigator_util.dart';
 import 'package:flutter/material.dart';
 
 import '../../util/reg_exp_util.dart';

@@ -1,7 +1,7 @@
-import 'package:care_giver/database/tables/alarm_table.dart';
-import 'package:care_giver/database/tables/first_aid_table.dart';
-import 'package:care_giver/database/tables/hospital_table.dart';
-import 'package:care_giver/database/tables/user_table.dart';
+import '../../database/tables/alarm_table.dart';
+import '../../database/tables/first_aid_table.dart';
+import '../../database/tables/hospital_table.dart';
+import '../../database/tables/user_table.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
