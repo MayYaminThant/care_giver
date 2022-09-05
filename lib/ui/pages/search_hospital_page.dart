@@ -123,8 +123,9 @@ class _SearchHospitalPageState extends State<SearchHospitalPage> {
             }),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          MapUtils.openMap();
+        onPressed: () async {
+          final l = await LocationUtils.currentLocation();
+          MapUtils.openMap(l.latitude, l.longitude);
         },
         child: const Icon(Icons.search),
       ),
