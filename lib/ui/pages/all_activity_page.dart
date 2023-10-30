@@ -1,5 +1,9 @@
 import 'dart:io';
 
+import 'package:floating_action_bubble/floating_action_bubble.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
+
 import '../../common/cache_manager.dart';
 import '../../database/tables/first_aid_table.dart';
 import '../../models/first_aid.dart';
@@ -8,10 +12,6 @@ import '../../ui/pages/add_newsfeed_page.dart';
 import '../../ui/pages/registration_page.dart';
 import '../../ui/pages/search_hospital_page.dart';
 import '../../util/navigator_util.dart';
-import 'package:floating_action_bubble/floating_action_bubble.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_typeahead/flutter_typeahead.dart';
-
 import 'set_alarm_page.dart';
 
 class AllActivityPage extends StatefulWidget {
@@ -69,7 +69,7 @@ class _AllActivityPageState extends State<AllActivityPage>
           ),
           child: Column(
             children: [
-              _searchBox(() {}),
+              _searchBox(() {}, context),
               const SizedBox(height: 16),
               _firstAidListBuilder(),
             ],
@@ -80,62 +80,64 @@ class _AllActivityPageState extends State<AllActivityPage>
     );
   }
 
-  Widget _searchBox(VoidCallback voidCallback) {
+  Widget _searchBox(VoidCallback voidCallback, BuildContext context) {
     return Container(
       height: 50,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
         border: Border.all(),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Expanded(
-            child: TypeAheadFormField<FirstAid>(
-              key: _formKey,
-              textFieldConfiguration: TextFieldConfiguration(
-                controller: _typeAheadController,
-                decoration: const InputDecoration(
-                  hintText: 'Search',
-                  contentPadding: EdgeInsets.all(10),
+      child: SingleChildScrollView(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Expanded(
+              child: TypeAheadFormField<FirstAid>(
+                key: _formKey,
+                textFieldConfiguration: TextFieldConfiguration(
+                  controller: _typeAheadController,
+                  decoration: const InputDecoration(
+                    hintText: 'Search',
+                    contentPadding: EdgeInsets.all(10),
+                  ),
                 ),
+                suggestionsCallback: (pattern) {
+                  return getSuggestions(pattern);
+                },
+                itemBuilder: (context, suggestion) {
+                  return ListTile(
+                    title: Text(suggestion.name),
+                  );
+                },
+                transitionBuilder: (context, suggestionsBox, controller) {
+                  return suggestionsBox;
+                },
+                onSuggestionSelected: (suggestion) async {
+                  _typeAheadController.text = suggestion.name;
+                  await _goToNewsfeed(suggestion);
+                },
+                errorBuilder: (context, error) => Text('$error',
+                    style: TextStyle(color: Theme.of(context).errorColor)),
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                validator: (value) {
+                  _filteredFirstAidName = value;
+
+                  Future.delayed(Duration.zero, () {
+                    setState(() {});
+                  });
+
+                  return null;
+                },
               ),
-              suggestionsCallback: (pattern) {
-                return getSuggestions(pattern);
-              },
-              itemBuilder: (context, suggestion) {
-                return ListTile(
-                  title: Text(suggestion.name),
-                );
-              },
-              transitionBuilder: (context, suggestionsBox, controller) {
-                return suggestionsBox;
-              },
-              onSuggestionSelected: (suggestion) async {
-                _typeAheadController.text = suggestion.name;
-                await _goToNewsfeed(suggestion);
-              },
-              errorBuilder: (context, error) => Text('$error',
-                  style: TextStyle(color: Theme.of(context).errorColor)),
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-              validator: (value) {
-                _filteredFirstAidName = value;
-
-                Future.delayed(Duration.zero, () {
-                  setState(() {});
-                });
-
-                return null;
-              },
             ),
-          ),
-          IconButton(
-              icon: const Icon(
-                Icons.search,
-                color: Colors.black,
-              ),
-              onPressed: () {}),
-        ],
+            IconButton(
+                icon: const Icon(
+                  Icons.search,
+                  color: Colors.black,
+                ),
+                onPressed: () {}),
+          ],
+        ),
       ),
     );
   }
